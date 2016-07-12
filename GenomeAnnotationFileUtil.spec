@@ -4,6 +4,11 @@
 */
 module GenomeAnnotationFileUtil {
 
+    /* A boolean - 0 for false, 1 for true.
+       @range (0, 1)
+    */
+    typedef int boolean;
+
     /*
         file_path or shock_id -- Local path or shock_id of the uploaded file with genome
                        sequence in GenBank format or zip-file with GenBank files.
@@ -11,6 +16,7 @@ module GenomeAnnotationFileUtil {
         genome_name -- The name you would like to use to reference this GenomeAnnotation.  
                        If not supplied, will use the Taxon Id and the data source to 
                        determine the name.
+        taxon_wsname - name of the workspace containing the Taxonomy data, defaults to 'ReferenceTaxons'
     */
     typedef structure {
         string file_path;
@@ -21,6 +27,9 @@ module GenomeAnnotationFileUtil {
         string workspace_name;
 
         string source;
+        string taxon_wsname;
+
+        boolean convert_to_legacy;
 
     } GenbankToGenomeAnnotationParams;
 

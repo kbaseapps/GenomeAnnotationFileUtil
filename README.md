@@ -1,6 +1,5 @@
-[![Build Status](https://travis-ci.org/msneddon/GenomeAnnotationFileUtil.svg?branch=master)](https://travis-ci.org/msneddon/GenomeAnnotationFileUtil)
 
 # GenomeAnnotationFileUtil
 ---
 
-This is the basic readme for this module. Include any usage or deployment instructions and links to other documentation here.
+Narrative uploader/downloader apps and local functions for GenomeAnnotation objects.

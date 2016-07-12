@@ -2,6 +2,7 @@ import unittest
 import os
 import json
 import time
+import shutil
 
 from os import environ
 try:
@@ -14,6 +15,8 @@ from pprint import pprint
 from biokbase.workspace.client import Workspace as workspaceService
 from GenomeAnnotationFileUtil.GenomeAnnotationFileUtilImpl import GenomeAnnotationFileUtil
 from GenomeAnnotationFileUtil.GenomeAnnotationFileUtilServer import MethodContext
+
+from DataFileUtil.DataFileUtilClient import DataFileUtil
 
 
 class GenomeAnnotationFileUtilTest(unittest.TestCase):
@@ -65,14 +68,41 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
     def getContext(self):
         return self.__class__.ctx
 
-    def test_your_method(self):
-        # Prepare test objects in workspace if needed using 
-        # self.getWsClient().save_objects({'workspace': self.getWsName(), 'objects': []})
-        #
-        # Run your method by
-        # ret = self.getImpl().your_method(self.getContext(), parameters...)
-        #
-        # Check returned data with
-        # self.assertEqual(ret[...], ...) or other unittest methods
-        pass
+    def test_one_simple_upload(self):
+        genomeFileUtil = self.getImpl()
+
+        tmp_dir = self.__class__.cfg['scratch']
+        file_name = "GCF_000005845.2_ASM584v2_genomic.gbff.gz"
+        shutil.copy(os.path.join("data", file_name), tmp_dir)
+        gbk_path = os.path.join(tmp_dir, file_name)
+        print('attempting upload')
+        ws_obj_name = 'MyGenome'
+        result = genomeFileUtil.genbank_to_genome_annotation(self.getContext(), 
+            {
+                'file_path':gbk_path,
+                'workspace_name':self.getWsName(),
+                'genome_name':ws_obj_name
+            });
+        pprint(result)
+        # todo: add test that result is correct
+
+
+        print('attempting upload through shock')
+        data_file_cli = DataFileUtil(os.environ['SDK_CALLBACK_URL'], 
+                                token=self.__class__.ctx['token'],
+                                service_ver='dev')
+        shock_id = data_file_cli.file_to_shock({'file_path': gbk_path})['shock_id']
+        ws_obj_name2 = 'MyGenome.2'
+        result2 = genomeFileUtil.genbank_to_genome_annotation(self.getContext(), 
+            {
+                'shock_id':shock_id,
+                'workspace_name':self.getWsName(),
+                'genome_name':ws_obj_name2,
+                'convert_to_legacy':1
+            });
+        pprint(result2)
+        # todo: add test that result is correct
+
+
+
         

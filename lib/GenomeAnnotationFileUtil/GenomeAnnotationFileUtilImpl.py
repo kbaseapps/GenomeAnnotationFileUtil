@@ -69,7 +69,8 @@ class GenomeAnnotationFileUtil:
         # return variables are: details
         #BEGIN genbank_to_genome_annotation
 
-        # validate inputs (only ones supported from UI are here, you can add more)
+        # validate input and set defaults.  Note that because we don't call the uploader method
+        # as a stand alone script, we do the validation here.
         if 'workspace_name' not in params:
             raise ValueError('workspace_name field was not defined')
         workspace_name = params['workspace_name']
@@ -78,9 +79,21 @@ class GenomeAnnotationFileUtil:
             raise ValueError('genome_name field was not defined')
         genome_name = params['genome_name']
 
-        source = None
+        source = 'Genbank'
         if 'source' in params:
             source = source;
+
+        taxon_wsname = 'ReferenceTaxons'
+        if 'taxon_wsname' in params:
+            taxon_wsname = params['taxon_wsname']
+
+        # other options to handle
+        # no_convert
+        # release
+        # taxon_reference
+        # exclude_feature_types
+        # type
+
 
         # construct the input directory where we stage files
         input_directory =  os.path.join(self.sharedFolder, 'assembly-upload-staging-'+str(uuid.uuid4()))
@@ -133,8 +146,21 @@ class GenomeAnnotationFileUtil:
 
                 workspace_name   = workspace_name,
                 core_genome_name = genome_name,
-                source           = source
+                source           = source,
+                taxon_wsname     = taxon_wsname
             )
+
+        #### Code to convert to legacy type if requested
+        if 'convert_to_legacy' in params and params['convert_to_legacy']==1:
+            from doekbase.data_api.converters import genome as cvt
+            print('Converting to legacy type, object={}'.format(genome_name))
+            cvt.convert_genome(
+                    shock_url=self.shockURL,
+                    handle_url=self.handleURL,
+                    ws_url=self.workspaceURL,
+                    obj_name=genome_name,
+                    ws_name=workspace_name)
+
 
         # get WS metadata to return the reference to the object (could be returned by the uploader method...)
         ws = Workspace(url=self.workspaceURL)
