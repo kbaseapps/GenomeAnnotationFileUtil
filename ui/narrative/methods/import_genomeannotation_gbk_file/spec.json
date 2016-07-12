@@ -1,0 +1,57 @@
+{
+  "ver" : "1.0.0",
+  "authors" : [ ],
+  "contact" : "help@kbase.us",
+  "visble" : true,
+  "categories" : [ "importers" ],
+  "widgets" : {
+    "input" : "kbaseNarrativeMethodInput",
+    "output" : "GenomeAnnotation"
+  },
+  "parameters" : [ {
+    "id" : "gbkFile",
+    "optional" : false,
+    "advanced" : false,
+    "allow_multiple" : false,
+    "default_values" : [ "" ],
+    "field_type" : "file",
+    "text_options" : {
+      "valid_ws_types" : [ ]
+    }
+  }, {
+    "id" : "outputObject",
+    "optional" : true,
+    "advanced" : false,
+    "allow_multiple" : false,
+    "default_values" : [ "" ],
+    "field_type" : "text",
+    "text_options" : {
+      "valid_ws_types" : [ "KBaseGenomeAnnotations.GenomeAnnotation" ],
+      "is_output_name" : true
+    }
+  } ],
+  "behavior" : {
+    "service-mapping" : {
+      "url" : "",
+      "name" : "GenomeAnnotationFileUtil",
+      "method" : "genbank_to_genome_annotation",
+      "input_mapping" : [
+        {
+          "narrative_system_variable": "workspace",
+          "target_property": "workspace_name"
+        },
+        {
+          "input_parameter": "outputObject",
+          "target_property": "genome_name"
+        },
+        {
+          "input_parameter": "gbkFile",
+          "target_property": "shock_id"
+        }
+      ],
+      "output_mapping" : [
+      ]
+    }
+  },
+  "job_id_output_field": "docker"
+}

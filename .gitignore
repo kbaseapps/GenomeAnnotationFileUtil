@@ -1,0 +1,6 @@
+test_local
+sdk.cfg
+lib/src
+*.bak-*
+*.pl
+*.js
