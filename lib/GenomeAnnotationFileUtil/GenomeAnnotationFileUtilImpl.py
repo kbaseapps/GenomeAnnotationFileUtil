@@ -187,6 +187,8 @@ class GenomeAnnotationFileUtil:
                     obj_name=genome_name,
                     ws_name=workspace_name)
 
+        # clear the temp directory
+        shutil.rmtree(input_directory)
 
         # get WS metadata to return the reference to the object (could be returned by the uploader method...)
         ws = Workspace(url=self.workspaceURL)
