@@ -110,8 +110,13 @@ class GenomeAnnotationFileUtil:
                 if 'ftp_url' not in params:
                     raise ValueError('No input file (either file_path, shock_id, or ftp_url) provided')
                 else:
-                    # TODO handle ftp
-                    raise ValueError('Fetch from ftp not yet implemented.')
+                    # TODO handle ftp - this creates a directory for us, so update the input directory
+                    script_utils.download_from_urls({
+                        'working_directory':input_directory,
+                        'urls' : {
+                            'ftpfiles': params['ftp_url']
+                        }});
+                    input_directory = os.path.join(input_directory,ftpfiles)
 
             else:
                 # handle shock file

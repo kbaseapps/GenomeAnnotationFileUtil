@@ -104,5 +104,16 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
         # todo: add test that result is correct
 
 
+        print('attempting upload through ftp url')
+        ws_obj_name3 = 'MyGenome.3'
+        result2 = genomeFileUtil.genbank_to_genome_annotation(self.getContext(), 
+            {
+                'ftp_url':'ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/bacteria/Escherichia_coli/reference/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.gbff.gz',
+                'workspace_name':self.getWsName(),
+                'genome_name':ws_obj_name3,
+                'convert_to_legacy':1
+            });
+        pprint(result2)
+
 
         
