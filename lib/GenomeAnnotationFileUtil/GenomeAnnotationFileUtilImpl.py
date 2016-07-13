@@ -69,6 +69,9 @@ class GenomeAnnotationFileUtil:
         # return variables are: details
         #BEGIN genbank_to_genome_annotation
 
+        print('genbank_to_genome_annotation -- paramaters = ')
+        pprint(params)
+
         # validate input and set defaults.  Note that because we don't call the uploader method
         # as a stand alone script, we do the validation here.
         if 'workspace_name' not in params:
@@ -88,7 +91,6 @@ class GenomeAnnotationFileUtil:
             taxon_wsname = params['taxon_wsname']
 
         # other options to handle
-        # no_convert
         # release
         # taxon_reference
         # exclude_feature_types
@@ -111,12 +113,30 @@ class GenomeAnnotationFileUtil:
                     raise ValueError('No input file (either file_path, shock_id, or ftp_url) provided')
                 else:
                     # TODO handle ftp - this creates a directory for us, so update the input directory
-                    script_utils.download_from_urls({
-                        'working_directory':input_directory,
-                        'urls' : {
-                            'ftpfiles': params['ftp_url']
-                        }});
-                    input_directory = os.path.join(input_directory,ftpfiles)
+                    print('calling Transform download utility: script_utils.download');
+                    print('URL provided = '+params['ftp_url']);
+                    script_utils.download_from_urls(
+                            working_directory = input_directory,
+                            token = ctx['token'], # not sure why this requires a token to download from a url...
+                            urls  = {
+                                        'ftpfiles': params['ftp_url']
+                                    }
+                        );
+                    input_directory = os.path.join(input_directory,'ftpfiles')
+                    # unpack everything in input directory
+                    dir_contents = os.listdir(input_directory)
+                    print('downloaded directory listing:')
+                    pprint(dir_contents)
+                    dir_files = []
+                    for f in dir_contents:
+                        if os.path.isfile(os.path.join(input_directory, f)):
+                            dir_files.append(f)
+
+                    print('processing files in directory...')
+                    for f in dir_files:
+                        # unpack if needed using the standard transform utility
+                        print('unpacking '+f)
+                        script_utils.extract_data(filePath=os.path.join(input_directory,f))
 
             else:
                 # handle shock file
@@ -134,10 +154,11 @@ class GenomeAnnotationFileUtil:
             genbank_file_path = os.path.join(input_directory, os.path.basename(local_file_path))
             shutil.copy2(local_file_path, genbank_file_path)
 
-        print("input genbank file =" + genbank_file_path)
+        if genbank_file_path is not None:
+            print("input genbank file =" + genbank_file_path)
 
-        # unpack if needed using the standard transform utility
-        script_utils.extract_data(filePath=genbank_file_path)
+            # unpack if needed using the standard transform utility
+            script_utils.extract_data(filePath=genbank_file_path)
 
         # do the upload (doesn't seem to return any information)
         uploader.upload_genome(

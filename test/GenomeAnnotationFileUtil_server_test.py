@@ -71,11 +71,12 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
     def test_one_simple_upload(self):
         genomeFileUtil = self.getImpl()
 
+        ### Test for a Local Function Call - file needs to be just on disk
         tmp_dir = self.__class__.cfg['scratch']
         file_name = "GCF_000005845.2_ASM584v2_genomic.gbff.gz"
         shutil.copy(os.path.join("data", file_name), tmp_dir)
         gbk_path = os.path.join(tmp_dir, file_name)
-        print('attempting upload')
+        print('attempting upload via local function directly')
         ws_obj_name = 'MyGenome'
         result = genomeFileUtil.genbank_to_genome_annotation(self.getContext(), 
             {
@@ -87,6 +88,7 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
         # todo: add test that result is correct
 
 
+        ### Test for upload from SHOCK - upload the file to shock first
         print('attempting upload through shock')
         data_file_cli = DataFileUtil(os.environ['SDK_CALLBACK_URL'], 
                                 token=self.__class__.ctx['token'],
@@ -104,6 +106,7 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
         # todo: add test that result is correct
 
 
+        ### Test for upload via FTP- use something from genbank
         print('attempting upload through ftp url')
         ws_obj_name3 = 'MyGenome.3'
         result2 = genomeFileUtil.genbank_to_genome_annotation(self.getContext(), 
