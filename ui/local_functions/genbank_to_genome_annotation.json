@@ -1,7 +1,7 @@
 {
-    "name" : "Save a genome Assembly from a FASTA file",
+    "name" : "Save a Genome Annotation from a Genbank file",
     "short_description" : 
-        "KBase Assembly represent assembled sequence data.  Use this method to create a new KBase Assembly from a FASTA file.",
+        "KBaseGenomeAnnotation objects represent genome assembly with annoations.  Use this method to create a new GenomeAnnotation from a Genbank file.",
 
     "long_description" : "todo: write longer description",
 

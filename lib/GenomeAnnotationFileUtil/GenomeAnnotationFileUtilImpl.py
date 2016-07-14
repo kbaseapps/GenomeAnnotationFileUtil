@@ -15,6 +15,9 @@ import biokbase.Transform.script_utils as script_utils
 import trns_transform_Genbank_Genome_to_KBaseGenomeAnnotations_GenomeAnnotation as uploader
 from DataFileUtil.DataFileUtilClient import DataFileUtil
 
+# For Genome to genbank downloader
+from doekbase.data_api.downloaders import GenomeAnnotation
+
 #END_HEADER
 
 
@@ -34,8 +37,8 @@ class GenomeAnnotationFileUtil:
     # the latter method is running.
     #########################################
     VERSION = "0.0.1"
-    GIT_URL = ""
-    GIT_COMMIT_HASH = "HEAD"
+    GIT_URL = "git@github.com:kbaseapps/GenomeAnnotationFileUtil.git"
+    GIT_COMMIT_HASH = "fbe639840c7ec6b8855b0ca7a7602a3ca60d3d2b"
     
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -48,6 +51,7 @@ class GenomeAnnotationFileUtil:
         self.shockURL = config['shock-url']
         self.handleURL = config['handle-service-url']
         self.sharedFolder = config['scratch']
+        self.callback_url = os.environ['SDK_CALLBACK_URL']
         #END_CONSTRUCTOR
         pass
     
@@ -59,10 +63,14 @@ class GenomeAnnotationFileUtil:
            file with genome sequence in GenBank format or zip-file with
            GenBank files. genome_name -- The name you would like to use to
            reference this GenomeAnnotation. If not supplied, will use the
-           Taxon Id and the data source to determine the name.) -> structure:
-           parameter "file_path" of String, parameter "shock_id" of String,
-           parameter "ftp_url" of String, parameter "genome_name" of String,
-           parameter "workspace_name" of String, parameter "source" of String
+           Taxon Id and the data source to determine the name. taxon_wsname -
+           name of the workspace containing the Taxonomy data, defaults to
+           'ReferenceTaxons') -> structure: parameter "file_path" of String,
+           parameter "shock_id" of String, parameter "ftp_url" of String,
+           parameter "genome_name" of String, parameter "workspace_name" of
+           String, parameter "source" of String, parameter "taxon_wsname" of
+           String, parameter "convert_to_legacy" of type "boolean" (A boolean
+           - 0 for false, 1 for true. @range (0, 1))
         :returns: instance of type "GenomeAnnotationDetails" -> structure:
         """
         # ctx is the context object
@@ -98,12 +106,11 @@ class GenomeAnnotationFileUtil:
 
 
         # construct the input directory where we stage files
-        input_directory =  os.path.join(self.sharedFolder, 'assembly-upload-staging-'+str(uuid.uuid4()))
+        input_directory =  os.path.join(self.sharedFolder, 'genome-upload-staging-'+str(uuid.uuid4()))
         os.makedirs(input_directory)
 
         # determine how to get the file: if it is from shock, download it.  If it
         # is just sitting there, then use it.  Move the file to the staging input directory
-
 
         genbank_file_path = None
 
@@ -140,7 +147,7 @@ class GenomeAnnotationFileUtil:
 
             else:
                 # handle shock file
-                dfUtil = DataFileUtil(os.environ['SDK_CALLBACK_URL'], token=ctx['token'])
+                dfUtil = DataFileUtil(self.callback_url, token=ctx['token'])
                 file_name = dfUtil.shock_to_file({
                                     'file_path': input_directory,
                                     'shock_id': params['shock_id']
@@ -207,6 +214,98 @@ class GenomeAnnotationFileUtil:
                              'details is not type dict as required.')
         # return the results
         return [details]
+
+    def genome_annotation_to_genbank(self, ctx, params):
+        """
+        :param params: instance of type "GenomeAnnotationToGenbankParams"
+           (genome_ref -- Reference to the GenomeAnnotation or Genome object
+           in KBase in any ws supported format OR genome_name +
+           workspace_name -- specifiy the genome name and workspace name of
+           what you want.  If genome_ref is defined, these args are ignored.
+           new_genbank_file_name -- specify the output name of the genbank
+           file save_to_shock -- set to 1 or 0, if 1 then output is saved to
+           shock. default is zero) -> structure: parameter "genome_ref" of
+           String, parameter "genome_name" of String, parameter
+           "workspace_name" of String, parameter "new_genbank_file_name" of
+           String, parameter "save_to_shock" of type "boolean" (A boolean - 0
+           for false, 1 for true. @range (0, 1))
+        :returns: instance of type "GenbankFile" -> structure: parameter
+           "path" of String, parameter "shock_id" of String
+        """
+        # ctx is the context object
+        # return variables are: file
+        #BEGIN genome_annotation_to_genbank
+
+        print('genome_annotation_to_genbank -- paramaters = ')
+        pprint(params)
+
+        service_endpoints = {
+            "workspace_service_url": self.workspaceURL, 
+            "shock_service_url": self.shockURL,
+            "handle_service_url": self.handleURL
+        }
+
+        # parse/validate parameters.  could do a better job here.
+        genome_ref = None
+        if 'genome_ref' in params and params['genome_ref'] is not None:
+            genome_ref = params['genome_ref']
+        else:
+            if 'genome_name' not in params:
+                raise ValueError('genome_ref and genome_name are not defined.  One of those is required.')
+            if 'workspace_name' not in params:
+                raise ValueError('workspace_name is not defined.  This is required if genome_name is specified' +
+                    ' without a genome_ref')
+            genome_ref = params['workspace_name'] + '/' + params['genome_name']
+
+        # do a quick lookup of object info- could use this to do some validation.  Here we need it to provide
+        # a nice output file name if it is not set...  We should probably catch errors here and print out a nice
+        # message - usually this would mean the ref was bad.
+        ws = Workspace(url=self.workspaceURL)
+        info = ws.get_object_info_new({'objects':[{'ref':genome_ref}],'includeMetadata':0, 'ignoreErrors':0})[0]
+        print('resolved object to:');
+        pprint(info)
+
+        if 'new_genbank_file_name' not in params or params['new_genbank_file_name'] is None:
+            new_genbank_file_name = info[1] + ".gbk"
+        else:
+            new_genbank_file_name = params['new_genbank_file_name']
+
+
+        # construct a working directory to hand off to the data_api
+        working_directory =  os.path.join(self.sharedFolder, 'genome-download-'+str(uuid.uuid4()))
+        os.makedirs(working_directory)
+        output_file_destination = os.path.join(working_directory,new_genbank_file_name)
+
+        # do it
+        print('calling: doekbase.data_api.downloaders.GenomeAnnotation.downloadAsGBK');
+        GenomeAnnotation.downloadAsGBK(
+                            genome_ref,
+                            service_endpoints,
+                            ctx['token'],
+                            output_file_destination,
+                            working_directory)
+
+        # if we need to upload to shock, well then do that too.
+        file = {}
+        if 'save_to_shock' in params and params['save_to_shock'] == 1:
+            dfUtil = DataFileUtil(self.callback_url, token=ctx['token'])
+            file['shock_id'] =dfUtil.file_to_shock({
+                                    'file_path':output_file_destination,
+                                    'gzip':0,
+                                    'make_handle':0
+                                    #attributes: {} #we can set shock attributes if we want
+                                })['shock_id']
+        else:
+            file['path'] = output_file_destination
+
+        #END genome_annotation_to_genbank
+
+        # At some point might do deeper type checking...
+        if not isinstance(file, dict):
+            raise ValueError('Method genome_annotation_to_genbank return value ' +
+                             'file is not type dict as required.')
+        # return the results
+        return [file]
 
     def status(self, ctx):
         #BEGIN_STATUS

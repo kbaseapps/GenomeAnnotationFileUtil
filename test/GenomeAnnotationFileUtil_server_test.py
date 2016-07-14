@@ -68,7 +68,7 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
     def getContext(self):
         return self.__class__.ctx
 
-    def test_one_simple_upload(self):
+    def skip_test_simple_upload(self):
         genomeFileUtil = self.getImpl()
 
         ### Test for a Local Function Call - file needs to be just on disk
@@ -87,7 +87,6 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
         pprint(result)
         # todo: add test that result is correct
 
-
         ### Test for upload from SHOCK - upload the file to shock first
         print('attempting upload through shock')
         data_file_cli = DataFileUtil(os.environ['SDK_CALLBACK_URL'], 
@@ -105,7 +104,6 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
         pprint(result2)
         # todo: add test that result is correct
 
-
         ### Test for upload via FTP- use something from genbank
         print('attempting upload through ftp url')
         ws_obj_name3 = 'MyGenome.3'
@@ -119,4 +117,70 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
         pprint(result2)
 
 
-        
+    def test_simple_download(self):
+        genomeFileUtil = self.getImpl()
+
+        tmp_dir = self.__class__.cfg['scratch']
+        file_name = "GCF_000005845.2_ASM584v2_genomic.gbff.gz"
+        shutil.copy(os.path.join("data", file_name), tmp_dir)
+        gbk_path = os.path.join(tmp_dir, file_name)
+        print('attempting upload via local function directly to test download')
+        ws_obj_name = 'g.download_test'
+        result = genomeFileUtil.genbank_to_genome_annotation(self.getContext(), 
+            {
+                'file_path':gbk_path,
+                'workspace_name':self.getWsName(),
+                'genome_name':ws_obj_name,
+                'convert_to_legacy':1
+            })[0];
+        pprint(result)
+
+        # download from the new type
+        downloadResult = genomeFileUtil.genome_annotation_to_genbank(self.getContext(), 
+            {
+                'genome_ref':result['genome_annotation_ref']
+            });
+        pprint(downloadResult)
+        # download and save to shock, test using the genome_name and workspace_name
+        downloadResult = genomeFileUtil.genome_annotation_to_genbank(self.getContext(), 
+            {
+                'genome_name':ws_obj_name,
+                'workspace_name':self.getWsName(),
+                'save_to_shock':1
+            });
+        pprint(downloadResult)
+
+        # download from the old type -- seems like this should work, but fails with error:
+        # Traceback (most recent call last):
+        #   File "GenomeAnnotationFileUtil_server_test.py", line 158, in test_simple_download
+        #     'output_name':'legacy_genome_genbank.gbk'
+        #   File "/kb/module/lib/GenomeAnnotationFileUtil/GenomeAnnotationFileUtilImpl.py", line 249, in genome_annotation_to_genbank
+        #     working_directory)
+        #   File "/kb/module/lib/doekbase/data_api/downloaders/GenomeAnnotation.py", line 75, in downloadAsGBK
+        #     writeFeaturesOrdered(ga_api, regions, out_file)
+        #   File "/kb/module/lib/doekbase/data_api/downloaders/GenomeAnnotation.py", line 132, in writeFeaturesOrdered
+        #     cds_by_gene = ga_api.get_cds_by_gene(feature_ids['by_type']['gene'])
+        #   File "/kb/module/lib/doekbase/data_api/annotation/genome_annotation/api.py", line 600, in get_cds_by_gene
+        #     return self.proxy.get_cds_by_gene(gene_feature_id_list)
+        #   File "/kb/module/lib/doekbase/data_api/annotation/genome_annotation/api.py", line 1125, in get_cds_by_gene
+        #     "  This method cannot return valid results for this data type.")
+        # TypeError: The Genome type does not contain relationships between features.  This method cannot return valid results for this data type.
+
+        #downloadResult = genomeFileUtil.genome_annotation_to_genbank(self.getContext(), 
+        #    {
+        #        'genome_name':ws_obj_name + '_genome_legacy',
+        #        'workspace_name':self.getWsName(),
+        #        'output_name':'legacy_genome_genbank.gbk'
+        #    });
+        #pprint(downloadResult)
+
+        # download from the old type, test putting the result in shock
+        #downloadResult = genomeFileUtil.genome_annotation_to_genbank(self.getContext(), 
+        #    {
+        #        'genome_name':ws_obj_name + '_genome_legacy',
+        #        'workspace_name':self.getWsName(),
+        #        'output_name':'legacy_genome_genbank.gbk',
+        #        'save_to_shock':1
+        #    });
+        #pprint(downloadResult)
+

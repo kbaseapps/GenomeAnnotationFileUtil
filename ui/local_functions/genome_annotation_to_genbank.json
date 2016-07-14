@@ -1,0 +1,19 @@
+{
+    "name" : "Get a Genbank file for a GenomeAnnotation",
+    "short_description" : 
+        "KBaseGenomeAnnotation objects represent genome assembly with annoations.  Use this method to get a GenomeAnnotation as a Genbank file.",
+
+    "long_description" : "todo: write longer description",
+
+    "tags" : {
+        "categories" : [],
+        "input": {
+            "file_types": [],
+            "kb_types": ["KBaseGenomeAnnotations.GenomeAnnotation"]
+        },
+        "output": {
+            "file_types": ["genbank"],
+            "kb_types": []
+        }
+    }
+}

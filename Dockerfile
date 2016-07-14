@@ -10,7 +10,7 @@ RUN apt-get install python-dev libffi-dev libssl-dev \
 
 # Install KBase Data API Library + dependencies
 RUN mkdir -p /kb/module && cd /kb/module && git clone https://github.com/kbase/data_api && \
-    cd data_api && git checkout f421cae && cd /kb/module && \
+    cd data_api && git checkout dd94def && cd /kb/module && \
     mkdir -p lib/ && cp -a data_api/lib/doekbase lib/ && \
     pip install -r /kb/module/data_api/requirements.txt
 
@@ -20,7 +20,7 @@ RUN mkdir -p /kb/module && cd /kb/module && git clone https://github.com/kbase/d
 # to make things easy, we copy the specific scripts we need to the lib directory
 
 RUN mkdir -p /kb/module && cd /kb/module && git clone https://github.com/kbase/transform && \
-    cd transform && git checkout 53633ed && cd /kb/module && \
+    cd transform && git checkout d02762c && cd /kb/module && \
     mkdir -p lib/ && cp -a transform/lib/biokbase /kb/deployment/lib/ && \
     cp transform/plugins/scripts/upload/trns_transform_FASTA_DNA_Assembly_to_KBaseGenomeAnnotations_Assembly.py lib/. && \
     cp transform/plugins/scripts/upload/trns_transform_Genbank_Genome_to_KBaseGenomeAnnotations_GenomeAnnotation.py lib/. && \

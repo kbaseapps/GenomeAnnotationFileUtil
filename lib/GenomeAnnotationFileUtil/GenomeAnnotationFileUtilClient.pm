@@ -129,6 +129,9 @@ GenbankToGenomeAnnotationParams is a reference to a hash where the following key
 	genome_name has a value which is a string
 	workspace_name has a value which is a string
 	source has a value which is a string
+	taxon_wsname has a value which is a string
+	convert_to_legacy has a value which is a GenomeAnnotationFileUtil.boolean
+boolean is an int
 GenomeAnnotationDetails is a reference to a hash where the following keys are defined
 
 </pre>
@@ -146,6 +149,9 @@ GenbankToGenomeAnnotationParams is a reference to a hash where the following key
 	genome_name has a value which is a string
 	workspace_name has a value which is a string
 	source has a value which is a string
+	taxon_wsname has a value which is a string
+	convert_to_legacy has a value which is a GenomeAnnotationFileUtil.boolean
+boolean is an int
 GenomeAnnotationDetails is a reference to a hash where the following keys are defined
 
 
@@ -205,6 +211,108 @@ GenomeAnnotationDetails is a reference to a hash where the following keys are de
     }
 }
  
+
+
+=head2 genome_annotation_to_genbank
+
+  $file = $obj->genome_annotation_to_genbank($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a GenomeAnnotationFileUtil.GenomeAnnotationToGenbankParams
+$file is a GenomeAnnotationFileUtil.GenbankFile
+GenomeAnnotationToGenbankParams is a reference to a hash where the following keys are defined:
+	genome_ref has a value which is a string
+	genome_name has a value which is a string
+	workspace_name has a value which is a string
+	new_genbank_file_name has a value which is a string
+	save_to_shock has a value which is a GenomeAnnotationFileUtil.boolean
+boolean is an int
+GenbankFile is a reference to a hash where the following keys are defined:
+	path has a value which is a string
+	shock_id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a GenomeAnnotationFileUtil.GenomeAnnotationToGenbankParams
+$file is a GenomeAnnotationFileUtil.GenbankFile
+GenomeAnnotationToGenbankParams is a reference to a hash where the following keys are defined:
+	genome_ref has a value which is a string
+	genome_name has a value which is a string
+	workspace_name has a value which is a string
+	new_genbank_file_name has a value which is a string
+	save_to_shock has a value which is a GenomeAnnotationFileUtil.boolean
+boolean is an int
+GenbankFile is a reference to a hash where the following keys are defined:
+	path has a value which is a string
+	shock_id has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub genome_annotation_to_genbank
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function genome_annotation_to_genbank (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to genome_annotation_to_genbank:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'genome_annotation_to_genbank');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "GenomeAnnotationFileUtil.genome_annotation_to_genbank",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'genome_annotation_to_genbank',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method genome_annotation_to_genbank",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'genome_annotation_to_genbank',
+				       );
+    }
+}
+ 
   
 
 sub version {
@@ -218,16 +326,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'genbank_to_genome_annotation',
+                method_name => 'genome_annotation_to_genbank',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method genbank_to_genome_annotation",
+            error => "Error invoking method genome_annotation_to_genbank",
             status_line => $self->{client}->status_line,
-            method_name => 'genbank_to_genome_annotation',
+            method_name => 'genome_annotation_to_genbank',
         );
     }
 }
@@ -264,6 +372,38 @@ sub _validate_version {
 
 
 
+=head2 boolean
+
+=over 4
+
+
+
+=item Description
+
+A boolean - 0 for false, 1 for true.
+@range (0, 1)
+
+
+=item Definition
+
+=begin html
+
+<pre>
+an int
+</pre>
+
+=end html
+
+=begin text
+
+an int
+
+=end text
+
+=back
+
+
+
 =head2 GenbankToGenomeAnnotationParams
 
 =over 4
@@ -278,6 +418,7 @@ file_path or shock_id -- Local path or shock_id of the uploaded file with genome
 genome_name -- The name you would like to use to reference this GenomeAnnotation.  
                If not supplied, will use the Taxon Id and the data source to 
                determine the name.
+taxon_wsname - name of the workspace containing the Taxonomy data, defaults to 'ReferenceTaxons'
 
 
 =item Definition
@@ -292,6 +433,8 @@ ftp_url has a value which is a string
 genome_name has a value which is a string
 workspace_name has a value which is a string
 source has a value which is a string
+taxon_wsname has a value which is a string
+convert_to_legacy has a value which is a GenomeAnnotationFileUtil.boolean
 
 </pre>
 
@@ -306,6 +449,8 @@ ftp_url has a value which is a string
 genome_name has a value which is a string
 workspace_name has a value which is a string
 source has a value which is a string
+taxon_wsname has a value which is a string
+convert_to_legacy has a value which is a GenomeAnnotationFileUtil.boolean
 
 
 =end text
@@ -333,6 +478,89 @@ a reference to a hash where the following keys are defined
 =begin text
 
 a reference to a hash where the following keys are defined
+
+=end text
+
+=back
+
+
+
+=head2 GenomeAnnotationToGenbankParams
+
+=over 4
+
+
+
+=item Description
+
+genome_ref -- Reference to the GenomeAnnotation or Genome object in KBase in 
+              any ws supported format
+OR
+genome_name + workspace_name -- specifiy the genome name and workspace name
+              of what you want.  If genome_ref is defined, these args are ignored.
+
+new_genbank_file_name -- specify the output name of the genbank file
+
+save_to_shock -- set to 1 or 0, if 1 then output is saved to shock. default is zero
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+genome_ref has a value which is a string
+genome_name has a value which is a string
+workspace_name has a value which is a string
+new_genbank_file_name has a value which is a string
+save_to_shock has a value which is a GenomeAnnotationFileUtil.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+genome_ref has a value which is a string
+genome_name has a value which is a string
+workspace_name has a value which is a string
+new_genbank_file_name has a value which is a string
+save_to_shock has a value which is a GenomeAnnotationFileUtil.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 GenbankFile
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+path has a value which is a string
+shock_id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+path has a value which is a string
+shock_id has a value which is a string
+
 
 =end text
 
