@@ -77,4 +77,20 @@ module GenomeAnnotationFileUtil {
     funcdef genome_annotation_to_genbank(GenomeAnnotationToGenbankParams params)
                 returns (GenbankFile file) authentication required;
 
+    typedef structure {
+        string input_ref;
+    } ExportParams;
+
+    typedef structure {
+        string shock_id;
+    } ExportOutput;
+
+    /*
+        A method designed especially for download, this calls 'get_assembly_as_fasta' to do
+        the work, but then packages the output with WS provenance and object info into
+        a zip file and saves to shock.
+    */
+    funcdef export_genome_annotation_as_genbank(ExportParams params)
+                returns (ExportOutput output) authentication required;
+
 };

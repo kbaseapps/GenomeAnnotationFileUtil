@@ -335,6 +335,10 @@ class Application(object):
                              name='GenomeAnnotationFileUtil.genome_annotation_to_genbank',
                              types=[dict])
         self.method_authentication['GenomeAnnotationFileUtil.genome_annotation_to_genbank'] = 'required'
+        self.rpc_service.add(impl_GenomeAnnotationFileUtil.export_genome_annotation_as_genbank,
+                             name='GenomeAnnotationFileUtil.export_genome_annotation_as_genbank',
+                             types=[dict])
+        self.method_authentication['GenomeAnnotationFileUtil.export_genome_annotation_as_genbank'] = 'required'
         self.rpc_service.add(impl_GenomeAnnotationFileUtil.status,
                              name='GenomeAnnotationFileUtil.status',
                              types=[dict])

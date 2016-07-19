@@ -68,7 +68,7 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
     def getContext(self):
         return self.__class__.ctx
 
-    def skip_test_simple_upload(self):
+    def test_simple_upload(self):
         genomeFileUtil = self.getImpl()
 
         ### Test for a Local Function Call - file needs to be just on disk
@@ -136,12 +136,15 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
         pprint(result)
 
         # download from the new type
+        print('Download and save as local file')
         downloadResult = genomeFileUtil.genome_annotation_to_genbank(self.getContext(), 
             {
                 'genome_ref':result['genome_annotation_ref']
             });
         pprint(downloadResult)
+
         # download and save to shock, test using the genome_name and workspace_name
+        print('Download and save single file to shock')
         downloadResult = genomeFileUtil.genome_annotation_to_genbank(self.getContext(), 
             {
                 'genome_name':ws_obj_name,
@@ -149,6 +152,13 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
                 'save_to_shock':1
             });
         pprint(downloadResult)
+
+        print('Download and package as zip archive')
+        exportResult = genomeFileUtil.export_genome_annotation_as_genbank(self.getContext(), 
+            {
+                'input_ref':self.getWsName()+'/'+ws_obj_name
+            });
+        pprint(exportResult)
 
         # download from the old type -- seems like this should work, but fails with error:
         # Traceback (most recent call last):

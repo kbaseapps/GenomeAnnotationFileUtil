@@ -48,6 +48,7 @@ class GenomeAnnotationFileUtil(object):
            String, parameter "convert_to_legacy" of type "boolean" (A boolean
            - 0 for false, 1 for true. @range (0, 1))
         :returns: instance of type "GenomeAnnotationDetails" -> structure:
+           parameter "genome_annotation_ref" of String
         """
         return self._client.call_method(
             'GenomeAnnotationFileUtil.genbank_to_genome_annotation',
@@ -61,15 +62,29 @@ class GenomeAnnotationFileUtil(object):
            workspace_name -- specifiy the genome name and workspace name of
            what you want.  If genome_ref is defined, these args are ignored.
            new_genbank_file_name -- specify the output name of the genbank
-           file save_to_shock -- set to 1 or 0, if 1 then output is saved to
-           shock. default is zero) -> structure: parameter "genome_ref" of
-           String, parameter "genome_name" of String, parameter
-           "workspace_name" of String, parameter "new_genbank_file_name" of
-           String, parameter "save_to_shock" of type "boolean" (A boolean - 0
-           for false, 1 for true. @range (0, 1))
+           file, optional save_to_shock -- set to 1 or 0, if 1 then output is
+           saved to shock. default is zero) -> structure: parameter
+           "genome_ref" of String, parameter "genome_name" of String,
+           parameter "workspace_name" of String, parameter
+           "new_genbank_file_name" of String, parameter "save_to_shock" of
+           type "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
         :returns: instance of type "GenbankFile" -> structure: parameter
            "path" of String, parameter "shock_id" of String
         """
         return self._client.call_method(
             'GenomeAnnotationFileUtil.genome_annotation_to_genbank',
+            [params], self._service_ver, context)
+
+    def export_genome_annotation_as_genbank(self, params, context=None):
+        """
+        A method designed especially for download, this calls 'get_assembly_as_fasta' to do
+        the work, but then packages the output with WS provenance and object info into
+        a zip file and saves to shock.
+        :param params: instance of type "ExportParams" -> structure:
+           parameter "input_ref" of String
+        :returns: instance of type "ExportOutput" -> structure: parameter
+           "shock_id" of String
+        """
+        return self._client.call_method(
+            'GenomeAnnotationFileUtil.export_genome_annotation_as_genbank',
             [params], self._service_ver, context)

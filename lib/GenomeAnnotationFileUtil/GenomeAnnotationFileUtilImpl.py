@@ -38,7 +38,7 @@ class GenomeAnnotationFileUtil:
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "git@github.com:kbaseapps/GenomeAnnotationFileUtil.git"
-    GIT_COMMIT_HASH = "fbe639840c7ec6b8855b0ca7a7602a3ca60d3d2b"
+    GIT_COMMIT_HASH = "ac848434223d916cf4f97a83e06a4dca3cb1d35f"
     
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -72,6 +72,7 @@ class GenomeAnnotationFileUtil:
            String, parameter "convert_to_legacy" of type "boolean" (A boolean
            - 0 for false, 1 for true. @range (0, 1))
         :returns: instance of type "GenomeAnnotationDetails" -> structure:
+           parameter "genome_annotation_ref" of String
         """
         # ctx is the context object
         # return variables are: details
@@ -223,12 +224,12 @@ class GenomeAnnotationFileUtil:
            workspace_name -- specifiy the genome name and workspace name of
            what you want.  If genome_ref is defined, these args are ignored.
            new_genbank_file_name -- specify the output name of the genbank
-           file save_to_shock -- set to 1 or 0, if 1 then output is saved to
-           shock. default is zero) -> structure: parameter "genome_ref" of
-           String, parameter "genome_name" of String, parameter
-           "workspace_name" of String, parameter "new_genbank_file_name" of
-           String, parameter "save_to_shock" of type "boolean" (A boolean - 0
-           for false, 1 for true. @range (0, 1))
+           file, optional save_to_shock -- set to 1 or 0, if 1 then output is
+           saved to shock. default is zero) -> structure: parameter
+           "genome_ref" of String, parameter "genome_name" of String,
+           parameter "workspace_name" of String, parameter
+           "new_genbank_file_name" of String, parameter "save_to_shock" of
+           type "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
         :returns: instance of type "GenbankFile" -> structure: parameter
            "path" of String, parameter "shock_id" of String
         """
@@ -306,6 +307,56 @@ class GenomeAnnotationFileUtil:
                              'file is not type dict as required.')
         # return the results
         return [file]
+
+    def export_genome_annotation_as_genbank(self, ctx, params):
+        """
+        A method designed especially for download, this calls 'get_assembly_as_fasta' to do
+        the work, but then packages the output with WS provenance and object info into
+        a zip file and saves to shock.
+        :param params: instance of type "ExportParams" -> structure:
+           parameter "input_ref" of String
+        :returns: instance of type "ExportOutput" -> structure: parameter
+           "shock_id" of String
+        """
+        # ctx is the context object
+        # return variables are: output
+        #BEGIN export_genome_annotation_as_genbank
+
+         # validate parameters
+        if 'input_ref' not in params:
+            raise ValueError('Cannot export GenomeAnnotation- not input_ref field defined.')
+
+        # get WS metadata to get ws_name and obj_name
+        ws = Workspace(url=self.workspaceURL)
+        info = ws.get_object_info_new({'objects':[{'ref': params['input_ref'] }],'includeMetadata':0, 'ignoreErrors':0})[0]
+
+        # export to a file
+        file = self.genome_annotation_to_genbank(ctx, { 
+                            'genome_ref': params['input_ref'], 
+                            'new_genbank_file_name': info[1]+'.fasta' })[0]
+
+        # create the output directory and move the file there
+        export_package_dir = os.path.join(self.sharedFolder, info[1])
+        os.makedirs(export_package_dir)
+        shutil.move(file['path'], os.path.join(export_package_dir, os.path.basename(file['path'])))
+
+        # package it up and be done
+        dfUtil = DataFileUtil(self.callback_url)
+        package_details = dfUtil.package_for_download({
+                                    'file_path': export_package_dir,
+                                    'ws_refs': [ params['input_ref'] ]
+                                })
+
+        output = { 'shock_id': package_details['shock_id'] }
+
+        #END export_genome_annotation_as_genbank
+
+        # At some point might do deeper type checking...
+        if not isinstance(output, dict):
+            raise ValueError('Method export_genome_annotation_as_genbank return value ' +
+                             'output is not type dict as required.')
+        # return the results
+        return [output]
 
     def status(self, ctx):
         #BEGIN_STATUS

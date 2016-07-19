@@ -132,7 +132,8 @@ GenbankToGenomeAnnotationParams is a reference to a hash where the following key
 	taxon_wsname has a value which is a string
 	convert_to_legacy has a value which is a GenomeAnnotationFileUtil.boolean
 boolean is an int
-GenomeAnnotationDetails is a reference to a hash where the following keys are defined
+GenomeAnnotationDetails is a reference to a hash where the following keys are defined:
+	genome_annotation_ref has a value which is a string
 
 </pre>
 
@@ -152,7 +153,8 @@ GenbankToGenomeAnnotationParams is a reference to a hash where the following key
 	taxon_wsname has a value which is a string
 	convert_to_legacy has a value which is a GenomeAnnotationFileUtil.boolean
 boolean is an int
-GenomeAnnotationDetails is a reference to a hash where the following keys are defined
+GenomeAnnotationDetails is a reference to a hash where the following keys are defined:
+	genome_annotation_ref has a value which is a string
 
 
 =end text
@@ -313,6 +315,98 @@ GenbankFile is a reference to a hash where the following keys are defined:
     }
 }
  
+
+
+=head2 export_genome_annotation_as_genbank
+
+  $output = $obj->export_genome_annotation_as_genbank($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a GenomeAnnotationFileUtil.ExportParams
+$output is a GenomeAnnotationFileUtil.ExportOutput
+ExportParams is a reference to a hash where the following keys are defined:
+	input_ref has a value which is a string
+ExportOutput is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a GenomeAnnotationFileUtil.ExportParams
+$output is a GenomeAnnotationFileUtil.ExportOutput
+ExportParams is a reference to a hash where the following keys are defined:
+	input_ref has a value which is a string
+ExportOutput is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+
+
+=end text
+
+=item Description
+
+A method designed especially for download, this calls 'get_assembly_as_fasta' to do
+the work, but then packages the output with WS provenance and object info into
+a zip file and saves to shock.
+
+=back
+
+=cut
+
+ sub export_genome_annotation_as_genbank
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function export_genome_annotation_as_genbank (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to export_genome_annotation_as_genbank:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'export_genome_annotation_as_genbank');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "GenomeAnnotationFileUtil.export_genome_annotation_as_genbank",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'export_genome_annotation_as_genbank',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method export_genome_annotation_as_genbank",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'export_genome_annotation_as_genbank',
+				       );
+    }
+}
+ 
   
 
 sub version {
@@ -326,16 +420,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'genome_annotation_to_genbank',
+                method_name => 'export_genome_annotation_as_genbank',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method genome_annotation_to_genbank",
+            error => "Error invoking method export_genome_annotation_as_genbank",
             status_line => $self->{client}->status_line,
-            method_name => 'genome_annotation_to_genbank',
+            method_name => 'export_genome_annotation_as_genbank',
         );
     }
 }
@@ -470,14 +564,18 @@ convert_to_legacy has a value which is a GenomeAnnotationFileUtil.boolean
 =begin html
 
 <pre>
-a reference to a hash where the following keys are defined
+a reference to a hash where the following keys are defined:
+genome_annotation_ref has a value which is a string
+
 </pre>
 
 =end html
 
 =begin text
 
-a reference to a hash where the following keys are defined
+a reference to a hash where the following keys are defined:
+genome_annotation_ref has a value which is a string
+
 
 =end text
 
@@ -499,7 +597,7 @@ OR
 genome_name + workspace_name -- specifiy the genome name and workspace name
               of what you want.  If genome_ref is defined, these args are ignored.
 
-new_genbank_file_name -- specify the output name of the genbank file
+new_genbank_file_name -- specify the output name of the genbank file, optional
 
 save_to_shock -- set to 1 or 0, if 1 then output is saved to shock. default is zero
 
@@ -559,6 +657,66 @@ shock_id has a value which is a string
 
 a reference to a hash where the following keys are defined:
 path has a value which is a string
+shock_id has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 ExportParams
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+input_ref has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+input_ref has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 ExportOutput
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+shock_id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
 
 
