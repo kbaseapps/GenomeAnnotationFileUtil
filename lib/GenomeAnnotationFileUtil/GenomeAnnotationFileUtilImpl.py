@@ -333,7 +333,7 @@ class GenomeAnnotationFileUtil:
         # export to a file
         file = self.genome_annotation_to_genbank(ctx, { 
                             'genome_ref': params['input_ref'], 
-                            'new_genbank_file_name': info[1]+'.fasta' })[0]
+                            'new_genbank_file_name': info[1]+'.gbk' })[0]
 
         # create the output directory and move the file there
         export_package_dir = os.path.join(self.sharedFolder, info[1])
