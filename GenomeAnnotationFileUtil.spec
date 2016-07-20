@@ -86,7 +86,7 @@ module GenomeAnnotationFileUtil {
     } ExportOutput;
 
     /*
-        A method designed especially for download, this calls 'get_assembly_as_fasta' to do
+        A method designed especially for download, this calls 'genome_annotation_to_genbank' to do
         the work, but then packages the output with WS provenance and object info into
         a zip file and saves to shock.
     */
