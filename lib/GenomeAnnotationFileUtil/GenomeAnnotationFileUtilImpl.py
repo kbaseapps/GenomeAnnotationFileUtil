@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #BEGIN_HEADER
 
 import os
@@ -37,8 +38,8 @@ class GenomeAnnotationFileUtil:
     # the latter method is running.
     #########################################
     VERSION = "0.0.1"
-    GIT_URL = "git@github.com:kbaseapps/GenomeAnnotationFileUtil.git"
-    GIT_COMMIT_HASH = "ac848434223d916cf4f97a83e06a4dca3cb1d35f"
+    GIT_URL = "https://github.com/rsutormin/GenomeAnnotationFileUtil"
+    GIT_COMMIT_HASH = "1cb3d9e675e8965dc2e04b6290676ed5746fe28a"
     
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -310,7 +311,7 @@ class GenomeAnnotationFileUtil:
 
     def export_genome_annotation_as_genbank(self, ctx, params):
         """
-        A method designed especially for download, this calls 'get_assembly_as_fasta' to do
+        A method designed especially for download, this calls 'genome_annotation_to_genbank' to do
         the work, but then packages the output with WS provenance and object info into
         a zip file and saves to shock.
         :param params: instance of type "ExportParams" -> structure:
@@ -357,6 +358,99 @@ class GenomeAnnotationFileUtil:
                              'output is not type dict as required.')
         # return the results
         return [output]
+
+    def load_new_genome_data(self, ctx, params):
+        """
+        :param params: instance of type "LoadNewGenomeDataParams" ->
+           structure: parameter "genome_ref" of String
+        :returns: instance of type "GenomeData" (scientific_name - scientific
+           name of the organism. taxonomy_id - NCBI taxonomic id of the
+           organism. kingdom - taxonomic kingdom of the organism.
+           scientific_lineage - scientific lineage of the organism.
+           genetic_code - scientific name of the organism. organism_aliases -
+           aliases for the organism associated with this GenomeAnnotation.
+           assembly_source - source organization for the Assembly.
+           assembly_source_id - identifier for the Assembly used by the
+           source organization. assembly_source_date - date of origin the
+           source indicates for the Assembly. gc_content - GC content for the
+           entire Assembly. dna_size - total DNA size for the Assembly.
+           num_contigs - number of contigs in the Assembly. contig_ids -
+           contig identifier strings for the Assembly. external_source - name
+           of the external source. external_source_date - date of origin the
+           external source indicates for this GenomeAnnotation. release -
+           release version for this GenomeAnnotation data.
+           original_source_filename - name of the file used to generate this
+           GenomeAnnotation. feature_type_counts - number of features of each
+           type.) -> structure: parameter "scientific_name" of String,
+           parameter "taxonomy_id" of Long, parameter "kingdom" of String,
+           parameter "scientific_lineage" of list of String, parameter
+           "genetic_code" of Long, parameter "organism_aliases" of list of
+           String, parameter "assembly_source" of String, parameter
+           "assembly_source_id" of String, parameter "assembly_source_date"
+           of String, parameter "gc_content" of Double, parameter "dna_size"
+           of Long, parameter "num_contigs" of Long, parameter "contig_ids"
+           of list of String, parameter "external_source" of String,
+           parameter "external_source_date" of String, parameter "release" of
+           String, parameter "original_source_filename" of String, parameter
+           "feature_type_counts" of mapping from String to Long, parameter
+           "features" of list of type "FeatureData" (feature_id - identifier
+           for this feature feature_type - the Feature type e.g., "mRNA",
+           "CDS", "gene", ... feature_function - the functional annotation
+           description feature_aliases - dictionary of Alias string to List
+           of source string identifiers feature_dna_sequence_length - integer
+           representing the length of the DNA sequence for convenience
+           feature_dna_sequence - string containing the DNA sequence of the
+           Feature feature_md5 - string containing the MD5 of the sequence,
+           calculated from the uppercase string feature_locations - list of
+           Feature regions, where the Feature bounds are calculated as
+           follows: - For "+" strand, [start, start + length) - For "-"
+           strand, (start - length, start] feature_publications - ist of any
+           known publications related to this Feature
+           feature_quality_warnings - list of strings indicating known data
+           quality issues (note: not used for Genome type, but is used for
+           GenomeAnnotation) feature_quality_score - quality value with
+           unknown algorithm for Genomes, not calculated yet for
+           GenomeAnnotations. feature_notes - notes recorded about this
+           Feature feature_inference - inference information) -> structure:
+           parameter "feature_id" of String, parameter "feature_type" of
+           String, parameter "feature_function" of String, parameter
+           "feature_aliases" of mapping from String to list of String,
+           parameter "feature_dna_sequence_length" of Long, parameter
+           "feature_dna_sequence" of String, parameter "feature_md5" of
+           String, parameter "feature_locations" of list of type "Region"
+           (contig_id - the identifier for the contig to which this region
+           corresponds. strand - either a "+" or a "-", for the strand on
+           which the region is located. start - starting position for this
+           region. length - distance from the start position that bounds the
+           end of the region.) -> structure: parameter "contig_id" of String,
+           parameter "strand" of String, parameter "start" of Long, parameter
+           "length" of Long, parameter "feature_publications" of list of
+           String, parameter "feature_quality_warnings" of list of String,
+           parameter "feature_quality_score" of list of String, parameter
+           "feature_notes" of String, parameter "feature_inference" of
+           String, parameter "protein" of type "ProteinData" (protein_id -
+           protein identifier, which is feature ID plus ".protein"
+           protein_amino_acid_sequence - amino acid sequence for this protein
+           protein_function - function of protein protein_aliases - list of
+           aliases for the protein protein_md5 - MD5 hash of the protein
+           translation (uppercase)) -> structure: parameter "protein_id" of
+           String, parameter "protein_amino_acid_sequence" of String,
+           parameter "protein_function" of String, parameter
+           "protein_aliases" of list of String, parameter "protein_md5" of
+           String, parameter "protein_domain_locations" of list of String
+        """
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN load_new_genome_data
+        raise ValueError("Method is not supported yet")
+        #END load_new_genome_data
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method load_new_genome_data return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
 
     def status(self, ctx):
         #BEGIN_STATUS
