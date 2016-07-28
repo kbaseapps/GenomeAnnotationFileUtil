@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from wsgiref.simple_server import make_server
 import sys
 import json
@@ -339,6 +340,10 @@ class Application(object):
                              name='GenomeAnnotationFileUtil.export_genome_annotation_as_genbank',
                              types=[dict])
         self.method_authentication['GenomeAnnotationFileUtil.export_genome_annotation_as_genbank'] = 'required'
+        self.rpc_service.add(impl_GenomeAnnotationFileUtil.load_new_genome_data,
+                             name='GenomeAnnotationFileUtil.load_new_genome_data',
+                             types=[dict])
+        self.method_authentication['GenomeAnnotationFileUtil.load_new_genome_data'] = 'required'
         self.rpc_service.add(impl_GenomeAnnotationFileUtil.status,
                              name='GenomeAnnotationFileUtil.status',
                              types=[dict])
