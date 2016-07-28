@@ -81,7 +81,7 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
                     shutil.copyfileobj(r, f)
         return gbk_path
 
-    def ok_test_simple_upload(self):
+    def test_simple_upload(self):
         genomeFileUtil = self.getImpl()
 
         ### Test for a Local Function Call - file needs to be just on disk
@@ -130,7 +130,7 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
         pprint(result2)
 
 
-    def ok_test_simple_download(self):
+    def test_simple_download(self):
         genomeFileUtil = self.getImpl()
 
         tmp_dir = self.__class__.cfg['scratch']
