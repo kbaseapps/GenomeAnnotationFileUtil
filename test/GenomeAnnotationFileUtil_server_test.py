@@ -3,6 +3,8 @@ import os
 import json
 import time
 import shutil
+import urllib2
+from contextlib import closing
 
 from os import environ
 try:
@@ -68,14 +70,25 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
     def getContext(self):
         return self.__class__.ctx
 
-    def test_simple_upload(self):
+    def getTempGenbank(self):
+        tmp_dir = self.__class__.cfg['scratch']
+        file_name = "GCF_000005845.2_ASM584v2_genomic.gbff.gz"
+        gbk_path = os.path.join(tmp_dir, file_name)
+        if not os.path.exists(gbk_path):
+            ftp_url = 'ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/bacteria/Escherichia_coli/reference/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.gbff.gz'
+            with closing(urllib2.urlopen(ftp_url)) as r:
+                with open(gbk_path, 'wb') as f:
+                    shutil.copyfileobj(r, f)
+        return gbk_path
+
+    def ok_test_simple_upload(self):
         genomeFileUtil = self.getImpl()
 
         ### Test for a Local Function Call - file needs to be just on disk
         tmp_dir = self.__class__.cfg['scratch']
-        file_name = "GCF_000005845.2_ASM584v2_genomic.gbff.gz"
-        shutil.copy(os.path.join("data", file_name), tmp_dir)
-        gbk_path = os.path.join(tmp_dir, file_name)
+        #file_name = "GCF_000005845.2_ASM584v2_genomic.gbff.gz"
+        #shutil.copy(os.path.join("data", file_name), tmp_dir)
+        gbk_path = self.getTempGenbank()  # os.path.join(tmp_dir, file_name)
         print('attempting upload via local function directly')
         ws_obj_name = 'MyGenome'
         result = genomeFileUtil.genbank_to_genome_annotation(self.getContext(), 
@@ -117,13 +130,13 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
         pprint(result2)
 
 
-    def test_simple_download(self):
+    def ok_test_simple_download(self):
         genomeFileUtil = self.getImpl()
 
         tmp_dir = self.__class__.cfg['scratch']
-        file_name = "GCF_000005845.2_ASM584v2_genomic.gbff.gz"
-        shutil.copy(os.path.join("data", file_name), tmp_dir)
-        gbk_path = os.path.join(tmp_dir, file_name)
+        #file_name = "GCF_000005845.2_ASM584v2_genomic.gbff.gz"
+        #shutil.copy(os.path.join("data", file_name), tmp_dir)
+        gbk_path = self.getTempGenbank()  # os.path.join(tmp_dir, file_name)
         print('attempting upload via local function directly to test download')
         ws_obj_name = 'g.download_test'
         result = genomeFileUtil.genbank_to_genome_annotation(self.getContext(), 
@@ -194,3 +207,18 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
         #    });
         #pprint(downloadResult)
 
+    def test_load_new_genome_data(self):
+        genomeFileUtil = self.getImpl()
+        gbk_path = self.getTempGenbank()
+        ws_obj_name = 'NewGenomeData.1'
+        genomeFileUtil.genbank_to_genome_annotation(self.getContext(),
+            {
+                'file_path':gbk_path,
+                'workspace_name':self.getWsName(),
+                'genome_name':ws_obj_name
+            });
+        genome_ref = self.getWsName() + '/' + ws_obj_name
+        genome_data = genomeFileUtil.load_new_genome_data(self.getContext(),
+            {"genome_ref": genome_ref})[0]
+        self.assertEqual(genome_data['scientific_name'], 'Escherichia coli str. K-12 substr. MG1655')
+        self.assertEqual(len(genome_data['features']), 9411)

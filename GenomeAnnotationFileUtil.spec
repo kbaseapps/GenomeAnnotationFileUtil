@@ -93,7 +93,7 @@ module GenomeAnnotationFileUtil {
     funcdef export_genome_annotation_as_genbank(ExportParams params)
                 returns (ExportOutput output) authentication required;
 
-    /*---------------- Copy of types of sub-elements GenomeAnnotation ----------------*/
+    /*---------------- Modified copy of types of GenomeAnnotation sub-elements ----------------*/
 
     /*
         contig_id - the identifier for the contig to which this region corresponds.

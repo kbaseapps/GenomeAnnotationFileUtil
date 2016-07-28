@@ -18,6 +18,7 @@ from DataFileUtil.DataFileUtilClient import DataFileUtil
 
 # For Genome to genbank downloader
 from doekbase.data_api.downloaders import GenomeAnnotation
+from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI as GenomeAnnotationAPI
 
 #END_HEADER
 
@@ -53,6 +54,11 @@ class GenomeAnnotationFileUtil:
         self.handleURL = config['handle-service-url']
         self.sharedFolder = config['scratch']
         self.callback_url = os.environ['SDK_CALLBACK_URL']
+        self.services = {
+            "workspace_service_url": self.workspaceURL,
+            "shock_service_url": self.shockURL,
+            "handle_service_url": self.handleURL
+        }
         #END_CONSTRUCTOR
         pass
     
@@ -442,7 +448,35 @@ class GenomeAnnotationFileUtil:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN load_new_genome_data
-        raise ValueError("Method is not supported yet")
+        genome_ref = params['genome_ref']
+        ga = GenomeAnnotationAPI(self.services, ctx['token'], genome_ref)
+        feature_types = ga.get_feature_types()
+        feature_ids_by_type = ga.get_feature_ids({"type_list": feature_types})
+        feature_ids = []
+        feature_id_map = feature_ids_by_type['by_type']
+        for feature_type in feature_id_map:
+            feature_ids.extend(feature_id_map[feature_type])
+        feature_map = ga.get_features(feature_ids)
+        protein_map = ga.get_proteins()
+        features = []
+        proteins = []
+        for feature_id in feature_map:
+            feature = feature_map[feature_id]
+            if feature_id in protein_map:
+                protein = protein_map[feature_id]
+                feature['protein'] = protein
+                proteins.append(protein)
+            features.append(feature)
+        #genome_data = ga.get_summary()    # It returnes None !!! Maybe something wasn't prepared at the end of upload from Genbank?
+        # Temporary load genome summary from directly from Workspace (there are some fields not present)
+        ws = Workspace(url=self.workspaceURL)
+        genome_data = ws.get_objects([{"ref": genome_ref}])[0]["data"]
+        genome_data.pop('publications', None)
+        genome_data.pop('feature_lookup', None)
+        if 'scientific_name' not in genome_data and 'display_sc_name' in genome_data:
+            genome_data['scientific_name'] = genome_data['display_sc_name']
+        genome_data['features'] = features
+        returnVal = genome_data
         #END load_new_genome_data
 
         # At some point might do deeper type checking...
