@@ -8,30 +8,59 @@
     "input" : "kbaseNarrativeMethodInput",
     "output" : "GenomeAnnotation"
   },
-  "parameters" : [ {
-    "id" : "gbkFile",
-    "optional" : false,
-    "advanced" : false,
-    "allow_multiple" : false,
-    "default_values" : [ "" ],
-    "field_type" : "file",
-    "text_options" : {
-      "valid_ws_types" : [ ]
-    }
-  }, {
-    "id" : "outputObject",
-    "optional" : true,
-    "advanced" : false,
-    "allow_multiple" : false,
-    "default_values" : [ "" ],
-    "field_type" : "text",
-    "text_options" : {
-      "valid_ws_types" : [ "KBaseGenomeAnnotations.GenomeAnnotation" ],
-      "is_output_name" : true
-    }
-  } ],
-  "behavior" : {
-    "service-mapping" : {
+  "parameters" : 
+    [ 
+      {
+        "id" : "gbkFile",
+        "optional" : false,
+        "advanced" : false,
+        "allow_multiple" : false,
+        "default_values" : [ "" ],
+        "field_type" : "file",
+        "text_options" : {
+          "valid_ws_types" : [ ]
+        }
+      }, 
+      {
+        "id" : "outputObject",
+        "optional" : true,
+        "advanced" : false,
+        "allow_multiple" : false,
+        "default_values" : [ "" ],
+        "field_type" : "text",
+        "text_options" : {
+          "valid_ws_types" : [ "KBaseGenomeAnnotations.GenomeAnnotation" ],
+          "is_output_name" : true
+        }
+      },
+      { 
+        "id": "source",
+	"optional": true,
+	"advanced": false,
+	"allow_multiple": false,
+	"default_values": [ "" ],
+        "field_type" : "text"
+      },
+      {  
+        "id": "release",
+        "optional": true,
+        "advanced": true,
+        "allow_multiple": false,
+        "default_values": [ "" ],
+        "field_type" : "text" 
+      },
+      {
+        "id": "exclude_feature_types",
+        "optional": true,
+        "advanced": true,
+        "allow_multiple": true,
+        "default_values": [ "" ],
+        "field_type": "text"
+      } 
+    ],
+    "behavior" : 
+    {
+      "service-mapping" : {
       "url" : "",
       "name" : "GenomeAnnotationFileUtil",
       "method" : "genbank_to_genome_annotation",

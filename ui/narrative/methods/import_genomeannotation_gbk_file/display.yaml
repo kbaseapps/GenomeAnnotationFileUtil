@@ -45,6 +45,31 @@ parameters :
         long-hint  : |
             Provide a name for the genome you are uploading (for example, Shewanella_MR_4)
 
+    source :
+        ui-name : |
+            Source of the GenBank file
+        short-hint : |
+            Provide name for the source of the data (for example: RefSeq, Ensembl, Arkin Lab)
+        long-hint : |
+            Provide name for the source of the data (for example: RefSeq, Ensembl, Arkin Lab)
+
+    release :
+        ui-name : |
+            Release or Version of the source data
+        short-hint : |
+            Release or Version of the source data (for example: Release31, V4)
+        long-hint : |
+           Release or Version of the source data (for example: Release31, V4)
+
+    exclude_feature_types : 
+        ui-name : |
+           Exclude Specific Feature Types
+        short-hint : |
+           GenBank Feature Types to exclude from the upload (for example: misc_feature, STS)
+        long-hint : |
+           GenBank Feature Types to exclude from the upload (for example: misc_feature, STS).
+           Note this must match the GenBank feature type exactly.
+
 description : none
 
 

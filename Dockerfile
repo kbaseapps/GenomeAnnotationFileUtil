@@ -20,7 +20,7 @@ RUN mkdir -p /kb/module && cd /kb/module && git clone https://github.com/jkbaumo
 # to make things easy, we copy the specific scripts we need to the lib directory
 
 RUN mkdir -p /kb/module && cd /kb/module && git clone https://github.com/jkbaumohl/transform && \
-    cd transform && git checkout 8555abb && cd /kb/module && \
+    cd transform && git checkout 3bb0eb5 && cd /kb/module && \
     mkdir -p lib/ && cp -a transform/lib/biokbase /kb/deployment/lib/ && \
     cp transform/plugins/scripts/upload/trns_transform_FASTA_DNA_Assembly_to_KBaseGenomeAnnotations_Assembly.py lib/. && \
     cp transform/plugins/scripts/upload/trns_transform_Genbank_Genome_to_KBaseGenomeAnnotations_GenomeAnnotation.py lib/. && \
