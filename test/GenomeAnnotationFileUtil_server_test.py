@@ -50,7 +50,7 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
     def tearDownClass(cls):
         if hasattr(cls, 'wsName'):
             cls.wsClient.delete_workspace({'workspace': cls.wsName})
-            print('Test workspace was deleted')
+            print('Test workspace {} was deleted'.format(cls.wsName))
 
     def getWsClient(self):
         return self.__class__.wsClient
@@ -118,16 +118,16 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
         # todo: add test that result is correct
 
         ### Test for upload via FTP- use something from genbank
-        print('attempting upload through ftp url')
-        ws_obj_name3 = 'MyGenome.3'
-        result2 = genomeFileUtil.genbank_to_genome_annotation(self.getContext(), 
-            {
-                'ftp_url':'ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/bacteria/Escherichia_coli/reference/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.gbff.gz',
-                'workspace_name':self.getWsName(),
-                'genome_name':ws_obj_name3,
-                'convert_to_legacy':1
-            });
-        pprint(result2)
+#        print('attempting upload through ftp url')
+#        ws_obj_name3 = 'MyGenome.3'
+#        result2 = genomeFileUtil.genbank_to_genome_annotation(self.getContext(), 
+#            {
+#                'ftp_url':'ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/bacteria/Escherichia_coli/reference/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.gbff.gz',
+#                'workspace_name':self.getWsName(),
+#                'genome_name':ws_obj_name3,
+#                'convert_to_legacy':1
+#            });
+#        pprint(result2)
 
 
     def test_simple_download(self):
