@@ -206,19 +206,3 @@ class GenomeAnnotationFileUtilTest(unittest.TestCase):
         #        'save_to_shock':1
         #    });
         #pprint(downloadResult)
-
-    def test_load_new_genome_data(self):
-        genomeFileUtil = self.getImpl()
-        gbk_path = self.getTempGenbank()
-        ws_obj_name = 'NewGenomeData.1'
-        genomeFileUtil.genbank_to_genome_annotation(self.getContext(),
-            {
-                'file_path':gbk_path,
-                'workspace_name':self.getWsName(),
-                'genome_name':ws_obj_name
-            });
-        genome_ref = self.getWsName() + '/' + ws_obj_name
-        genome_data = genomeFileUtil.load_new_genome_data(self.getContext(),
-            {"genome_ref": genome_ref})[0]
-        self.assertEqual(genome_data['scientific_name'], 'Escherichia coli str. K-12 substr. MG1655')
-        self.assertEqual(len(genome_data['features']), 9411)
